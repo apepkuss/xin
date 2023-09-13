@@ -1,4 +1,4 @@
-use super::common::LlamaCppLogitBiasType;
+use super::common::{LlamaCppLogitBiasType, Usage};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -79,7 +79,7 @@ pub struct CompletionObject {
     created: u32,
     model: String,
     choices: Vec<CompletionObjectChoice>,
-    usage: Vec<CompletionObjectUsage>,
+    usage: Vec<Usage>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -91,14 +91,4 @@ pub struct CompletionObjectChoice {
     logprobs: Option<u32>,
     /// The reason the model stopped generating tokens. This will be `stop` if the model hit a natural stop point or a provided stop sequence, `length` if the maximum number of tokens specified in the request was reached, or `function_call` if the model called a function.
     finish_reason: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct CompletionObjectUsage {
-    /// Number of tokens in the prompt.
-    prompt_tokens: u32,
-    /// Number of tokens in the generated completion.
-    completion_tokens: u32,
-    /// Total number of tokens used in the request (prompt + completion).
-    total_tokens: u32,
 }

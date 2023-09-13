@@ -1,5 +1,29 @@
 use serde::{Deserialize, Serialize};
 
+pub struct CreateEmbeddingsRequestBuilder {
+    req: CreateEmbeddingsRequest,
+}
+impl CreateEmbeddingsRequestBuilder {
+    pub fn new(model: impl Into<String>, input: Vec<String>) -> Self {
+        Self {
+            req: CreateEmbeddingsRequest {
+                model: model.into(),
+                input,
+                user: None,
+            },
+        }
+    }
+
+    pub fn with_user(mut self, user: impl Into<String>) -> Self {
+        self.req.user = Some(user.into());
+        self
+    }
+
+    pub fn build(self) -> CreateEmbeddingsRequest {
+        self.req
+    }
+}
+
 /// Creates an embedding vector representing the input text.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateEmbeddingsRequest {

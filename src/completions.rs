@@ -2,6 +2,41 @@ use super::common::LlamaCppLogitBiasType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+pub struct CreateCompletionRequestBuilder {
+    req: CreateCompletionRequest,
+}
+impl CreateCompletionRequestBuilder {
+    pub fn new(model: impl Into<String>, prompt: impl Into<String>) -> Self {
+        Self {
+            req: CreateCompletionRequest {
+                model: model.into(),
+                prompt: prompt.into(),
+                suffix: None,
+                max_tokens: 16,
+                temperature: None,
+                top_p: None,
+                n_choice: None,
+                stream: false,
+                logprobs: None,
+                echo: false,
+                stop: None,
+                presence_penalty: None,
+                frequency_penalty: None,
+                best_of: None,
+                logit_bias: None,
+                user: None,
+                llama_cpp_top_k: 0,
+                llama_cpp_repeat_penalty: 0.0,
+                llama_cpp_logit_bias_type: None,
+            },
+        }
+    }
+
+    pub fn build(self) -> CreateCompletionRequest {
+        self.req
+    }
+}
+
 /// Creates a completion for the provided prompt and parameters.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateCompletionRequest {
@@ -13,7 +48,7 @@ pub struct CreateCompletionRequest {
     /// The maximum number of tokens to generate in the completion. Defaults to 16.
     ///
     /// The token count of your prompt plus max_tokens cannot exceed the model's context length.
-    max_tokens: Option<u32>,
+    max_tokens: u32,
     temperature: Option<f32>,
     top_p: Option<f32>,
     n_choice: Option<u32>,

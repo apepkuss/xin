@@ -141,6 +141,7 @@ pub struct ChatRequest {
     n_choice: Option<i32>,
     /// Whether to stream the results as they are generated. Useful for chatbots.
     /// Defaults to false.
+    #[serde(skip_serializing_if = "Option::is_none")]
     stream: Option<bool>,
     /// A list of tokens at which to stop generation. If None, no stop tokens are used. Up to 4 sequences where the API will stop generating further tokens.
     /// Defaults to None

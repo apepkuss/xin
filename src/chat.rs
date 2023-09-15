@@ -2,10 +2,10 @@ use crate::common::Usage;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-pub struct ChatRequestBuilder {
-    req: ChatRequest,
+pub struct ChatCompletionRequestBuilder {
+    req: ChatCompletionRequest,
 }
-impl ChatRequestBuilder {
+impl ChatCompletionRequestBuilder {
     /// Creates a new builder with the given model.
     ///
     /// # Arguments
@@ -15,9 +15,9 @@ impl ChatRequestBuilder {
     /// * `messages` - A list of messages comprising the conversation so far.
     ///
     /// * `sampling` - The sampling method to use.
-    pub fn new(model: impl Into<String>, messages: Vec<ChatRequestMessage>) -> Self {
+    pub fn new(model: impl Into<String>, messages: Vec<ChatCompletionRequestMessage>) -> Self {
         Self {
-            req: ChatRequest {
+            req: ChatCompletionRequest {
                 model: model.into(),
                 messages,
                 temperature: None,
@@ -36,10 +36,10 @@ impl ChatRequestBuilder {
         }
     }
 
-    pub fn with_sampling(mut self, sampling: ChatRequestSampling) -> Self {
+    pub fn with_sampling(mut self, sampling: ChatCompletionRequestSampling) -> Self {
         let (temperature, top_p) = match sampling {
-            ChatRequestSampling::Temperature(t) => (t, 1.0),
-            ChatRequestSampling::TopP(p) => (1.0, p),
+            ChatCompletionRequestSampling::Temperature(t) => (t, 1.0),
+            ChatCompletionRequestSampling::TopP(p) => (1.0, p),
         };
         self.req.temperature = Some(temperature);
         self.req.top_p = Some(top_p);
@@ -100,7 +100,7 @@ impl ChatRequestBuilder {
         self
     }
 
-    pub fn with_functions(mut self, functions: Vec<ChatRequestFunction>) -> Self {
+    pub fn with_functions(mut self, functions: Vec<ChatCompletionRequestFunction>) -> Self {
         self.req.functions = Some(functions);
         self
     }
@@ -110,17 +110,17 @@ impl ChatRequestBuilder {
         self
     }
 
-    pub fn build(self) -> ChatRequest {
+    pub fn build(self) -> ChatCompletionRequest {
         self.req
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatRequest {
+pub struct ChatCompletionRequest {
     /// The model to use for generating completions.
     model: String,
     /// A list of messages comprising the conversation so far.
-    messages: Vec<ChatRequestMessage>,
+    messages: Vec<ChatCompletionRequestMessage>,
     /// Adjust the randomness of the generated text. Between 0.0 and 2.0. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
     ///
     /// We generally recommend altering this or top_p but not both.
@@ -172,16 +172,16 @@ pub struct ChatRequest {
     //* OpenAI specific parameters
     /// A list of functions the model may generate JSON inputs for.
     #[serde(skip_serializing_if = "Option::is_none")]
-    functions: Option<Vec<ChatRequestFunction>>,
+    functions: Option<Vec<ChatCompletionRequestFunction>>,
     /// Controls how the model responds to function calls. "none" means the model does not call a function, and responds to the end-user. "auto" means the model can pick between an end-user or calling a function. Specifying a particular function via `{"name":\ "my_function"}` forces the model to call that function. "none" is the default when no functions are present. "auto" is the default if functions are present.
     #[serde(skip_serializing_if = "Option::is_none")]
     function_call: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatRequestMessage {
+pub struct ChatCompletionRequestMessage {
     /// The role of the messages author. One of `system`, `user`, `assistant`, or `function`.
-    pub role: ChatRequestRole,
+    pub role: ChatCompletionRole,
 
     /// The contents of the message. `content` is required for all messages, and may be empty for assistant messages with function calls.
     pub content: String,
@@ -196,7 +196,7 @@ pub struct ChatRequestMessage {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub enum ChatRequestSampling {
+pub enum ChatCompletionRequestSampling {
     /// What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
     Temperature(f32),
     /// An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
@@ -206,7 +206,7 @@ pub enum ChatRequestSampling {
 /// The role of the messages author.
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
-pub enum ChatRequestRole {
+pub enum ChatCompletionRole {
     System,
     User,
     Assistant,
@@ -214,18 +214,18 @@ pub enum ChatRequestRole {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatRequestFunction {
+pub struct ChatCompletionRequestFunction {
     name: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     description: Option<String>,
-    parameters: ChatRequestFunctionParameters,
+    parameters: ChatCompletionRequestFunctionParameters,
 }
 
 /// The parameters the functions accepts, described as a JSON Schema object. See the [guide](https://platform.openai.com/docs/guides/gpt/function-calling) for examples, and the [JSON Schema reference](https://json-schema.org/understanding-json-schema/) for documentation about the format.
 ///
 /// To describe a function that accepts no parameters, provide the value `{"type": "object", "properties": {}}`.
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatRequestFunctionParameters {
+pub struct ChatCompletionRequestFunctionParameters {
     #[serde(rename = "type")]
     pub schema_type: JSONSchemaType,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -263,7 +263,7 @@ pub struct JSONSchemaDefine {
 
 /// Represents a chat completion response returned by model, based on the provided input.
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatResponse {
+pub struct ChatCompletionResponse {
     /// A unique identifier for the chat completion.
     id: String,
     /// The object type, which is always `chat.completion`.
@@ -273,23 +273,23 @@ pub struct ChatResponse {
     /// The model used for the chat completion.
     model: String,
     /// A list of chat completion choices. Can be more than one if `n_choice` is greater than 1.
-    choices: Vec<ChatResponseChoice>,
+    choices: Vec<ChatCompletionResponseChoice>,
     /// Usage statistics for the completion request.
     usage: Vec<Usage>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatResponseChoice {
+pub struct ChatCompletionResponseChoice {
     /// The index of the choice in the list of choices.
     index: u32,
     /// A chat completion message generated by the model.
-    message: ChatResponseMessage,
+    message: ChatCompletionResponseMessage,
     /// The reason the model stopped generating tokens. This will be `stop` if the model hit a natural stop point or a provided stop sequence, `length` if the maximum number of tokens specified in the request was reached, or `function_call` if the model called a function.
     finish_reason: FinishReason,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct ChatResponseMessage {
+pub struct ChatCompletionResponseMessage {
     /// The role of the author of this message.
     role: String,
     /// The contents of the message.

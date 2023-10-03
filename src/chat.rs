@@ -195,7 +195,7 @@ pub struct ChatCompletionRequestMessage {
     pub function_call: Option<ChatMessageFunctionCall>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, Copy, PartialEq)]
 pub enum ChatCompletionRequestSampling {
     /// What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
     Temperature(f32),
